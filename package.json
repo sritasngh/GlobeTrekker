@@ -25,6 +25,7 @@
   "homepage": "https://github.com/sritasngh/GlobeTrekker#readme",
   "dependencies": {
     "express": "^4.18.2",
+    "morgan": "^1.10.0",
     "slugify": "^1.6.6"
   },
   "devDependencies": {

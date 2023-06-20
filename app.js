@@ -1,16 +1,38 @@
 // core modules
 const fs = require('fs');
 const express = require('express');
+// 3rd party module
+const morgan=require('morgan');
+
 
 const app = express();
+
+
+// core middleware
 app.use(express.json());
+
+// 3rd party middleware
+app.use(morgan('dev'));
+
+// Creating our own middleware
+app.use((req, res, next)=>{
+    console.log('Hello from the middleware!');
+    next();
+});
+
+app.use((req, res, next)=>{
+    req.requestTime=new Date().toISOString();
+    next();
+});
 
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/starter/dev-data/data/tours-simple.json`, 'utf-8'));
 // console.log(tours);
 
+// Route handlers or controllers
 const getAllTours = (req, res) => {
     res.status(200).json({
         status: 'success',
+        requestTime: req.requestTime,
         results: tours.length,
         data: {
             tours
@@ -37,6 +59,7 @@ const getTour = (req, res) => {
         }
     });
 }
+
 
 const createTour = (req, res) => {
     // console.log(req.body);
@@ -83,10 +106,73 @@ const deleteTour = (req, res) => {
     });
 }
 
-app.route('/api/v1/tours').get(getAllTours).post(createTour);
+const getAllUsers = (req, res) => {
+    res.status(400).json({
+        status: 'error',
+        requestTime: req.requestTime,
+        message: 'This route handler is not yet implemented'
+    });
+};
 
-app.route('/api/v1/tours/:id').get(getTour).patch(updateTour).delete(deleteTour);
+const getUser = (req, res) => {
+    res.status(400).json({
+        status: 'error',
+        requestTime: req.requestTime,
+        message: 'This route handler is not yet implemented'
+    });
+}
 
+
+const createUser = (req, res) => {
+    res.status(400).json({
+        status: 'error',
+        requestTime: req.requestTime,
+        message: 'This route handler is not yet implemented'
+    });
+}
+
+const updateUser = (req, res) => {
+    res.status(400).json({
+        status: 'error',
+        requestTime: req.requestTime,
+        message: 'This route handler is not yet implemented'
+    });
+}
+
+const deleteUser = (req, res) => {
+    res.status(400).json({
+        status: 'error',
+        requestTime: req.requestTime,
+        message: 'This route handler is not yet implemented'
+    });
+}
+
+// Routes
+app
+    .route('/api/v1/tours')
+    .get(getAllTours)
+    .post(createTour);
+
+
+
+app
+    .route('/api/v1/Users/:id')
+    .get(getUser)
+    .patch(updateUser)
+    .delete(deleteUser);
+
+app
+    .route('/api/v1/Users')
+    .get(getAllUsers)
+    .post(createUser);
+
+app
+    .route('/api/v1/Users/:id')
+    .get(getUser)
+    .patch(updateUser)
+    .delete(deleteUser);
+
+// start server
 const port = 3000;
 app.listen(port, () => {
     console.log(`App running on port:${port}...`);
