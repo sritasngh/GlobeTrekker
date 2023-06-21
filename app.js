@@ -11,7 +11,10 @@ const app = express();
 // core middleware
 app.use(express.json());
 // 3rd party middleware
-app.use(morgan('dev'));
+// console.log(process.env.NODE_ENV);
+if (process.env.NODE_ENV === 'development') {
+    app.use(morgan('dev'));
+}
 
 // Adding route for static file using express builtin middleware
 app.use(express.static(`${__dirname}/starter/public`));
@@ -23,7 +26,7 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
-    req.requestTime=new Date().toISOString();
+    req.requestTime = new Date().toISOString();
     next();
 });
 
