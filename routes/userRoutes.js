@@ -1,7 +1,7 @@
-const express=require('express');
-const userController=require('./../controllers/userController');
+const express = require('express');
+const userController = require('../controllers/userController');
 
-const router=express.Router();
+const router = express.Router();
 
 router
     .route('/')
@@ -14,4 +14,4 @@ router
     .patch(userController.updateUser)
     .delete(userController.deleteUser);
 
-module.exports=router;
+module.exports = router;
