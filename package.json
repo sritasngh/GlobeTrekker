@@ -4,7 +4,7 @@
   "description": "GlobeTrekker is a website for global tour exploration and booking.",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon app.js"
+    "start": "nodemon server.js"
   },
   "repository": {
     "type": "git",
