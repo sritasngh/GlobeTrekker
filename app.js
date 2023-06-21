@@ -11,9 +11,13 @@ const app = express();
 
 // core middleware
 app.use(express.json());
-
 // 3rd party middleware
 app.use(morgan('dev'));
+
+
+// Adding route for static file using express builtin middleware
+app.use(express.static(`${__dirname}/starter/public`));
+
 
 // Creating our own middleware
 app.use((req, res, next)=>{
