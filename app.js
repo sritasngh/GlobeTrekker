@@ -19,12 +19,6 @@ if (process.env.NODE_ENV === 'development') {
 // Adding route for static file using express builtin middleware
 app.use(express.static(`${__dirname}/starter/public`));
 
-// Creating our own middleware
-app.use((req, res, next) => {
-    console.log('Hello from the middleware!');
-    next();
-});
-
 app.use((req, res, next) => {
     req.requestTime = new Date().toISOString();
     next();
@@ -33,5 +27,14 @@ app.use((req, res, next) => {
 // mounting Routers on the two different routes
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+
+// Handle those routers not handled
+// app.get(): for get req, req.post(): for post req, similarly req.all(): is for all the methods.
+app.all('*', (req, res, next) => {
+    res.status(404).json({
+        status: 'fail',
+        message: `Can't find ${req.originalUrl} on this server!`,
+    });
+});
 
 module.exports = app;
