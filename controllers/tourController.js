@@ -1,59 +1,79 @@
 const Tour = require('../models/tourModel');
 
+class APIFeatures {
+    constructor(query, queryString) {
+        // query is mongoose query and queryString is the one that we get from express i.e route
+        this.query = query;
+        this.queryString = queryString;
+    }
+
+    filter() {
+        // 1A)Filtering
+        const queryObj = { ...this.queryString };
+        const excludedFields = ['page', 'sort', 'limit', 'fields'];
+        excludedFields.forEach((el) => delete queryObj[el]);
+
+        // 1B) Advanced filtering
+        let queryStr = JSON.stringify(queryObj);
+        queryStr = queryStr.replace(
+            /\b(gte|gt|lte|lt)\b/g,
+            (match) => `$${match}`
+        );
+
+        this.query = this.query.find(JSON.parse(queryStr));
+
+        return this;
+    }
+
+    sort() {
+        if (this.queryString.sort) {
+            // Incase of more than one sorting parameter put , in the API query and mongoose use space to separate multiple sorting parameters
+            const sortBy = this.queryString.sort.split(',').join(' ');
+            this.query = this.query.sort(sortBy);
+        } else {
+            this.query = this.query.sort('-createdAt');
+        }
+
+        return this;
+    }
+
+    limitFields() {
+        if (this.queryString.fields) {
+            const fields = this.queryString.fields.split(',').join(' ');
+            this.query = this.query.select(fields);
+        } else {
+            this.query = this.query.select('-__v');
+        }
+
+        return this;
+    }
+
+    paginate() {
+        const page = this.queryString.page * 1 || 1;
+        const limit = this.queryString.limit * 1 || 100;
+        const skip = (page - 1) * limit;
+
+        // page=3&limit=10, page1:1-10, page2:11-20, page3:21:30
+        this.query = this.query.skip(skip).limit(limit);
+        return this;
+    }
+}
+
 // Route handlers or controllers
 exports.getAllTours = async (req, res) => {
     try {
         // on doing this there won't be any scope of sorting, pagination or performing any operation on the query in the future, so we use other approach.
         // const tours = await Tour.find(req.query);
-
-        // BUILD QUERY
-        // 1A)Filtering
-        const queryObj = { ...req.query };
-        const execludeFields = ['page', 'sort', 'limit', 'fileds'];
-        execludeFields.forEach((el) => delete queryObj[el]);
-
-        // 1B) Advanced filtering
-        let queryStr = JSON.stringify(queryObj);
-        queryStr = queryStr.replace(
-            /\b{gte|gt|lte|lt}\b/g,
-            (match) => `$${match}`
-        );
-        let query = Tour.find(JSON.parse(queryStr));
-
-        // 2) Sorting
-        if (req.query.sort) {
-            // Incase of more than one sorting parameter put , in the API query and mongoose use space to separate multiple sorting parameters
-            const sortBy = req.query.sort.split(',').join(' ');
-            query = query.sort(sortBy);
-        }
-
-        // 3) Field limiting
-        if (req.query.fields) {
-            const fields = req.query.fields.split(',').join(' ');
-            query = query.select(fields);
-        } else {
-            query = query.select('-__v');
-        }
-
-        // 4) Pagination
-        if (req.query.page) {
-            const page = req.query.page * 1 || 1;
-            const limit = req.query.limit * 1 || 100;
-            const skip = (page - 1) * limit;
-
-            // page=3&limit=10, page1:1-10, page2:11-20, page3:21:30
-            const numTours = await Tour.countDocuments();
-            if (skip > numTours) throw new Error('This page does not exist');
-            else query = query.skip(skip).limit(limit);
-        }
-
-        // EXECUTE QUERY
-        const tours = await query;
+        const features = new APIFeatures(Tour.find(), req.query)
+            .filter()
+            .sort()
+            .limitFields()
+            .paginate();
+        const tours = await features.query;
 
         // SEND RESPONSE
         res.status(200).json({
             status: 'success',
-            requestTime: req.requestTime,
             results: tours.length,
             data: {
                 tours,
