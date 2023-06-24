@@ -24,6 +24,16 @@ mongoose
 
 // start server
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
+const server = app.listen(port, () => {
     console.log(`App running on port:${port}...`);
+});
+
+// this is how we handle unhandled rejection globally caused due to any process like db connection failed or any other process; process.listen if encountered any error then it will be catch to process.on();
+
+process.on('unhandledRejection', (err) => {
+    console.log(err.name, err.message);
+    console.log('UNHANDLED REJECTION! Shutting down...');
+    server.close(() => {
+        process.exit(1);
+    });
 });
