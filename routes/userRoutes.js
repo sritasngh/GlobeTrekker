@@ -6,6 +6,7 @@ const router = express.Router();
 
 // User purpose routers
 router.post('/signup', authController.signup);
+router.post('/login', authController.login);
 
 // REST format routers are more useful for admin purpose
 router
