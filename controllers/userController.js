@@ -50,6 +50,15 @@ exports.updateMe = catchAsync(async (req, res, next) => {
     });
 });
 
+// we are not deleting the user but making them inactive
+exports.deleteMe = catchAsync(async (req, res, next) => {
+    await User.findByIdAndUpdate(req.user.id, { active: false });
+
+    res.status(204).json({
+        status: 'success',
+        data: null,
+    });
+});
 exports.getUser = (req, res) => {
     res.status(400).json({
         status: 'error',

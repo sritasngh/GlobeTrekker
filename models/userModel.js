@@ -40,6 +40,11 @@ const userSchema = new mongoose.Schema({
             message: 'Password mismatched',
         },
     },
+    active: {
+        type: Boolean,
+        default: true,
+        select: false,
+    },
 });
 
 // pre-save middleware: happens between the moment when we receive the data and it is persisted to the DB.
@@ -55,6 +60,12 @@ userSchema.pre('save', async function (next) {
 
     // once the validation has been done then we don't need passwordConfirm.
     this.passwordConfirm = undefined;
+});
+
+userSchema.pre(/^find/, function (next) {
+    //This points to the current query
+    this.find({ active: { $ne: false } });
+    next();
 });
 
 // candidatePassword: that user enter to login

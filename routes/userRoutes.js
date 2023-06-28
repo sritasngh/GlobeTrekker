@@ -10,6 +10,8 @@ router.post('/login', authController.login);
 
 router.patch('/updateMe', authController.protect, userController.updateMe);
 
+router.delete('/deleteMe', authController.protect, userController.deleteMe);
+
 // REST format routers are more useful for admin purpose
 router
     .route('/')
