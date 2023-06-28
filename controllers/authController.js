@@ -80,6 +80,23 @@ exports.protect = catchAsync(async (req, res, next) => {
     // TODO: Implement these checks to provide extra security
     // 3) Check if user still exists
     // 4) check if user changed password after JWT had been issued
-
+    const currentUser = await User.findById(decoded.id);
+    // GRANT ACCESS TO PROTECTED ROUTE
+    req.user = currentUser;
     next();
 });
+
+exports.restrictTo =
+    (...roles) =>
+    (req, res, next) => {
+        // roles ["admin", "lead-guide"], role='user'
+        if (!roles.includes(req.user.role)) {
+            return next(
+                new AppError(
+                    'You do not have permission to perform this action',
+                    403
+                )
+            );
+        }
+        next();
+    };
