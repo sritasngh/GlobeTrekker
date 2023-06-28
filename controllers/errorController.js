@@ -1,4 +1,4 @@
-const AppError = require('./../utils/appError');
+const AppError = require('../utils/appError');
 
 const handleCastErrorDB = (err) => {
     const message = `Invalid ${err.path}: ${err.value}.`;
@@ -19,6 +19,11 @@ const handleValidationErrorDB = (err) => {
     const message = `Invalid input data. ${errors.join('. ')}`;
     return new AppError(message, 400);
 };
+
+const handleJWTError = () => new AppError('Invalid token', 401);
+
+const handleJWTExpiredError = () =>
+    new AppError('Your token has expired, please login again', 401);
 
 const sendErrorDev = (err, res) => {
     res.status(err.statusCode).json({
@@ -69,6 +74,11 @@ module.exports = (err, req, res, next) => {
         if (error.code === 11000) error = handleDuplicateFieldsDB(error);
         if (error.name === 'ValidationError')
             error = handleValidationErrorDB(error);
+        // when JWT token is invalid
+        if (error.name === 'JsonWebTokenError') error = handleJWTError();
+        // when JWT token has been expired
+        if (error.name === 'TokenExpiredError') error = handleJWTExpiredError();
+
         sendErrorProd(error, res);
     }
 };
